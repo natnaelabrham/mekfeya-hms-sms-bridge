@@ -1,0 +1,3 @@
+-keep class com.huawei.hms.support.sms.** { *; }
+-keep class com.huawei.hms.support.api.client.Status { *; }
+-keep class com.huawei.hms.common.api.CommonStatusCodes { *; }

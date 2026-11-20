@@ -1,0 +1,19 @@
+name: mekfeya_hms_sms_bridge
+description: Huawei HMS ReadSmsManager OTP auto-read bridge for Mekfeya without modifying MainActivity.kt.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.mekfeya.hmssmsbridge
+        pluginClass: MekfeyaHmsSmsBridgePlugin
