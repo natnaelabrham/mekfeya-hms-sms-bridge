@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,7 @@ import io.flutter.plugin.common.MethodChannel;
 public class MekfeyaHmsSmsBridgePlugin
     implements FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler {
 
+  private static final String TAG = "MekfeyaHmsSms";
   private static final String CHANNEL_NAME = "com.mekfeya.ethiofinance/hms_sms_retriever";
 
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -90,6 +92,7 @@ public class MekfeyaHmsSmsBridgePlugin
   private void startSmsRetriever(@NonNull MethodChannel.Result result) {
     final Activity currentActivity = activity;
     if (currentActivity == null) {
+      Log.w(TAG, "startSmsRetriever: no active Activity.");
       result.success(false);
       return;
     }
@@ -100,13 +103,16 @@ public class MekfeyaHmsSmsBridgePlugin
       task.addOnCompleteListener(
           completedTask -> {
             if (completedTask.isSuccessful()) {
+              Log.i(TAG, "ReadSmsManager.start succeeded.");
               result.success(true);
             } else {
+              Log.w(TAG, "ReadSmsManager.start failed.", completedTask.getException());
               unregisterReceiver();
               result.success(false);
             }
           });
-    } catch (Throwable ignored) {
+    } catch (Throwable t) {
+      Log.w(TAG, "ReadSmsManager.start threw.", t);
       unregisterReceiver();
       result.success(false);
     }
@@ -132,12 +138,20 @@ public class MekfeyaHmsSmsBridgePlugin
               return;
             }
             @SuppressWarnings("deprecation")
-            Object statusObj = bundle.get(ReadSmsConstant.EXTRA_STATUS);
-            if (!(statusObj instanceof Status)) {
+            Status status = bundle.getParcelable(ReadSmsConstant.EXTRA_STATUS);
+            if (status == null) {
+              @SuppressWarnings("deprecation")
+              Object statusObj = bundle.get(ReadSmsConstant.EXTRA_STATUS);
+              if (statusObj instanceof Status) {
+                status = (Status) statusObj;
+              }
+            }
+            if (status == null) {
+              Log.w(TAG, "Broadcast received without Status extra.");
               return;
             }
-            Status status = (Status) statusObj;
             int code = status.getStatusCode();
+            Log.i(TAG, "Broadcast received with statusCode=" + code);
             if (code == CommonStatusCodes.SUCCESS) {
               String message = bundle.getString(ReadSmsConstant.EXTRA_SMS_MESSAGE);
               if (message != null && !message.isEmpty()) {

@@ -1,6 +1,6 @@
 name: mekfeya_hms_sms_bridge
 description: Huawei HMS ReadSmsManager OTP auto-read bridge for Mekfeya without modifying MainActivity.kt.
-version: 1.0.0
+version: 1.0.1
 publish_to: none
 
 environment:
